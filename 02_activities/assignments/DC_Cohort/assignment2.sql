@@ -32,7 +32,6 @@ FROM product;
 
 --END QUERY
 
-
 --Windowed Functions
 /* 1. Write a query that selects from the customer_purchases table and numbers each customer’s  
 visits to the farmer’s market (labeling each market date with a different number). 
@@ -58,7 +57,6 @@ WHERE market_date < '2022-04-29';
 
 --END QUERY
 
-
 /* 2. Reverse the numbering of the query so each customer’s most recent visit is labeled 1, 
 then write another query that uses this one as a subquery (or temp table) and filters the results to 
 only the customer’s most recent visit.
@@ -76,7 +74,6 @@ FROM customer_purchases;
 
 
 --END QUERY
-
 
 /* 3. Using a COUNT() window function, include a value along with each row of the 
 customer_purchases table that indicates how many different times that customer has purchased that product_id. 
@@ -100,7 +97,6 @@ WHERE visit_rank = 1;
 
 
 --END QUERY
-
 
 -- String manipulations
 /* 1. Some product names in the product table have descriptions like "Jar" or "Organic". 
@@ -126,8 +122,8 @@ WHERE market_date < '2022-04-29';
 
 
 
---END QUERY
 
+--END QUERY
 
 /* 2. Filter the query to show any product_size value that contain a number with REGEXP. */
 --QUERY 6
@@ -143,7 +139,6 @@ WHERE INSTR(product_name, '-') > 0;
 
 
 --END QUERY
-
 
 -- UNION
 /* 1. Using a UNION, write a query that displays the market dates with the highest and lowest total sales.
@@ -162,8 +157,6 @@ WHERE product_size REGEXP '[0-9]';
 
 
 --END QUERY
-
-
 
 /* SECTION 3 */
 
@@ -229,7 +222,6 @@ GROUP BY v.vendor_name, p.product_name;
 
 --END QUERY
 
-
 /*2. Using `INSERT`, add a new row to the product_units table (with an updated timestamp). 
 This can be any product you desire (e.g. add another record for Apple Pie). */
 --QUERY 10
@@ -243,7 +235,6 @@ WHERE product_qty_type = 'unit';
 
 
 --END QUERY
-
 
 -- DELETE
 /* 1. Delete the older record for the whatever product you added. 
@@ -262,7 +253,6 @@ WHERE product_name = 'Apple Pie'
 
 --END QUERY
 
-
 -- UPDATE
 /* 1.We want to add the current_quantity to the product_units table. 
 First, add a new column, current_quantity to the table using the following syntax.
@@ -279,6 +269,7 @@ Third, SET current_quantity = (...your select statement...), remembering that WH
 Finally, make sure you have a WHERE statement to update the right row, 
 	you'll need to use product_units.product_id to refer to the correct row within the product_units table. 
 When you have all of these components, you can run the update statement. */
+
 --QUERY 12
 DROP TABLE IF EXISTS product_units;
 
@@ -299,9 +290,19 @@ ORDER BY vi.market_date DESC
 LIMIT 1
 ), 0);
 
+ALTER TABLE product_units
+ADD current_quantity INT;
+
+UPDATE product_units
+SET current_quantity = COALESCE((
+SELECT quantity
+FROM vendor_inventory vi
+WHERE vi.product_id = product_units.product_id
+ORDER BY vi.market_date DESC
+LIMIT 1
+), 0);
+
+
 
 
 --END QUERY
-
-
-
